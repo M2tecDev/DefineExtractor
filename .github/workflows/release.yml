@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # triggers on v1.0.0, v1.2.3, etc.
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure CMake (Release)
+        run: cmake --preset release
+
+      - name: Build (Release)
+        run: cmake --build --preset release
+
+      - name: Run tests
+        run: ./build/release/test_helpers.exe
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: DefineExtractor ${{ github.ref_name }}
+          body: |
+            ## DefineExtractor ${{ github.ref_name }}
+
+            ### Download
+            - **DefineExtractor.exe** – Windows x64 Release Build
+
+            ### Changelog
+            See [commits](${{ github.server_url }}/${{ github.repository }}/commits/${{ github.ref_name }}) for full history.
+          files: build/release/DefineExtractor.exe
+          draft: false
+          prerelease: false
