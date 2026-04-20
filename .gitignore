@@ -1,69 +1,58 @@
-Extern
-__test
-__trash
+# ── Build output (CMake Presets) ──────────────────────────────────────────
+build/
+out/
+Output/
 
-.vs
+# ── Visual Studio ─────────────────────────────────────────────────────────
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-*.ncb
-*.opensdf
-*.sdf
-#+easy with .suo
-#*.suo
+# VS generates these from CMakeLists.txt in "Open Folder" mode — not source
 *.sln
 *.vcxproj
-*.vcxproj.*
-*.htm
-*.bsc
-*.exe
-*.ilk
-*.map
-*.pdb
-*.idb
+*.vcxproj.filters
+*.vcxproj.user
+
+# IntelliSense cache
+ipch/
+.cache/
 *.aps
 
-obj
-ipch
-Debug
-Release
-include
-MfcRelease
-*___Win32_MfcRelease
-MfcDebug
-*___Win32_MfcDebug
-Distribute
-
-bin
-
-OBJDIR
-.obj
-
-Depend
-Depend.bak
-
-*.a
+# ── Compiled / linked output ──────────────────────────────────────────────
+*.exe
 *.dll
 *.lib
-*.o
+*.a
 *.so
+*.o
+*.obj
+*.ilk
+*.pdb
+*.idb
 *.iobj
 *.ipdb
+*.bsc
+*.map
 
-db_r*
-game_r*
+# ── CMake internal ────────────────────────────────────────────────────────
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+# VS-generated CMake settings (use CMakePresets.json instead)
+CMakeSettings.json
 
-db_symlink
-game_symlink
-
-pre_qc
+# ── Python ────────────────────────────────────────────────────────────────
 *.pyc
+__pycache__/
 
-*.bak
-/.project
-
-### archives
+# ── Archives (prevent accidental large binary commits) ────────────────────
+*.zip
 *.rar
 *.7z
-*.zip
 *.gz
 *.bz
 *.xz
@@ -71,3 +60,14 @@ pre_qc
 *.tgz
 *.tbz
 *.txz
+
+# ── Misc ──────────────────────────────────────────────────────────────────
+*.bak
+*.log
+/.project
+
+# ── Tool output (nicht committen) ─────────────────────────────────────────
+repomix-output.md
+
+# ── Claude Code session data ──────────────────────────────────────────────
+/.claude
