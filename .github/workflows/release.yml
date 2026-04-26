@@ -23,7 +23,7 @@ jobs:
         run: ./build/release/test_helpers.exe
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: DefineExtractor ${{ github.ref_name }}
           body: |
