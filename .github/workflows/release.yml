@@ -5,8 +5,13 @@ on:
     tags:
       - 'v*.*.*'   # triggers on v1.0.0, v1.2.3, etc.
 
+permissions:
+  contents: read
+
 jobs:
   build-and-release:
+    permissions:
+      contents: write
     runs-on: windows-latest
 
     steps:
