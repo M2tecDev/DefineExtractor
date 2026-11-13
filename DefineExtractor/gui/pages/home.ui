@@ -1,0 +1,101 @@
+/* home.ui — Home page */
+
+import { ScrollView, ListView, Button, HorizontalBox, VerticalBox } from "std-widgets.slint";
+
+component HomePage inherits VerticalBox {
+    spacing: 8px;
+    padding: 8px;
+
+    Text {
+        text: "Welcome to DefineExtractor";
+        font_size: 24px;
+        font_weight: 700;
+        color: #6366f1;
+        horizontal_alignment: center;
+        vertical_stretch: 0;
+    }
+
+    Text {
+        text: "CHANGELOG";
+        font_size: 12px;
+        font_weight: 600;
+        color: #94a3b8;
+        vertical_stretch: 0;
+    }
+
+    Rectangle {
+        border_color: #2a2a3e;
+        border_width: 1px;
+        vertical_stretch: 0;
+
+        VerticalBox {
+            padding: 6px;
+            Text {
+                text: root.changelog_text;
+                font_size: 13px;
+                color: #f8fafc;
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    Text {
+        text: "RECENT FOLDERS";
+        font_size: 12px;
+        font_weight: 600;
+        color: #94a3b8;
+        vertical_stretch: 0;
+    }
+
+    Rectangle {
+        border_color: #2a2a3e;
+        border_width: 1px;
+        min_height: 30px;
+        max_height: 120px;
+        preferred_height: 80px;
+        vertical_stretch: 0;
+
+        VerticalBox {
+            padding: 6px;
+
+            if (root.recent_folders.length == 0): HorizontalBox {
+                alignment: center;
+                Text {
+                    text: "No recent folders";
+                    color: #94a3b8;
+                    font_size: 12px;
+                    horizontal_alignment: center;
+                }
+            }
+
+            if (root.recent_folders.length > 0): ListView {
+                for folder in root.recent_folders: HorizontalBox {
+                    spacing: 10px;
+
+                    Text {
+                        text: folder;
+                        font_size: 12px;
+                        color: #f8fafc;
+                        vertical_stretch: 1;
+                    }
+
+                    Button {
+                        text: "Open";
+                        width: 60px;
+                        height: 28px;
+                        clicked => { open_folder(folder); }
+                    }
+                }
+            }
+        }
+    }
+
+    // fill remaining space so elements stay at top
+    Rectangle { vertical_stretch: 1; }
+
+    in-out property<string> changelog_text: "Welcome to DefineExtractor!\n\nUse the sidebar to navigate:\n• Home - This page\n• Defines - Load and extract C++ defines\n• Params - Extract Python parameters\n• Settings - Configure paths\n• Logs - View output logs";
+    in-out property<[string]> recent_folders: [];
+    in-out property<[int]> recent_timestamps: [];
+
+    callback open_folder(string);
+}

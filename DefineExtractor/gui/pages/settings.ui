@@ -1,0 +1,165 @@
+/* settings.ui — Settings page with Paths and Scan Options */
+
+import { Button, HorizontalBox, VerticalBox, LineEdit, CheckBox } from "std-widgets.slint";
+
+component SettingsPage inherits VerticalBox {
+    spacing: 20px;
+    padding: 12px;
+
+    // --- PATHS ---
+    VerticalBox {
+        spacing: 10px;
+        vertical_stretch: 0;
+
+        Text {
+            text: "PATHS";
+            font_size: 14px;
+            font_weight: 600;
+            color: #6366f1;
+        }
+
+        // Client Path
+        VerticalBox {
+            spacing: 4px;
+            Text { text: "Client Path"; font_size: 12px; font_weight: 600; color: #94a3b8; }
+            HorizontalBox {
+                spacing: 8px;
+                LineEdit {
+                    text: root.client_path;
+                    read_only: true;
+                    placeholder_text: "Not set";
+                    font_size: 14px;
+                    horizontal_stretch: 1;
+                    preferred_height: 36px;
+                }
+                Button {
+                    text: "📂";
+                    width: 40px;
+                    height: 32px;
+                    enabled: !root.is_running;
+                    clicked => { root.browse_path(0); }
+                }
+                Rectangle { width: 12px; height: 12px; background: root.client_set ? #22c55e : #ef4444; }
+            }
+        }
+
+        // Server Path
+        VerticalBox {
+            spacing: 4px;
+            Text { text: "Server Path"; font_size: 12px; font_weight: 600; color: #94a3b8; }
+            HorizontalBox {
+                spacing: 8px;
+                LineEdit {
+                    text: root.server_path;
+                    read_only: true;
+                    placeholder_text: "Not set";
+                    font_size: 14px;
+                    horizontal_stretch: 1;
+                    preferred_height: 36px;
+                }
+                Button {
+                    text: "📂";
+                    width: 40px;
+                    height: 32px;
+                    enabled: !root.is_running;
+                    clicked => { root.browse_path(1); }
+                }
+                Rectangle { width: 12px; height: 12px; background: root.server_set ? #22c55e : #ef4444; }
+            }
+        }
+
+        // Python Root
+        VerticalBox {
+            spacing: 4px;
+            Text { text: "Python Root"; font_size: 12px; font_weight: 600; color: #94a3b8; }
+            HorizontalBox {
+                spacing: 8px;
+                LineEdit {
+                    text: root.python_root;
+                    read_only: true;
+                    placeholder_text: "Not set";
+                    font_size: 14px;
+                    horizontal_stretch: 1;
+                    preferred_height: 36px;
+                }
+                Button {
+                    text: "📂";
+                    width: 40px;
+                    height: 32px;
+                    enabled: !root.is_running;
+                    clicked => { root.browse_path(2); }
+                }
+                Rectangle { width: 12px; height: 12px; background: root.python_set ? #22c55e : #ef4444; }
+            }
+        }
+
+        Button {
+            text: "Clear All Paths";
+            height: 32px;
+            horizontal_stretch: 0;
+            clicked => { root.clear_paths(); }
+        }
+    }
+
+    // --- OPTIONS ---
+    VerticalBox {
+        spacing: 10px;
+        vertical_stretch: 0;
+
+        Text {
+            text: "OPTIONS";
+            font_size: 14px;
+            font_weight: 600;
+            color: #6366f1;
+        }
+
+        GridLayout {
+            spacing: 10px;
+            Row {
+                CheckBox {
+                    checked: root.opt_include_defines;
+                    text: "Include Defines/If-Blocks";
+                    toggled => { root.opt_include_defines = self.checked; }
+                }
+                CheckBox {
+                    checked: root.opt_include_funcs;
+                    text: "Include Functions";
+                    toggled => { root.opt_include_funcs = self.checked; }
+                }
+            }
+            Row {
+                CheckBox {
+                    checked: root.opt_multithread;
+                    text: "Multi-threading";
+                    toggled => { root.opt_multithread = self.checked; }
+                }
+                CheckBox {
+                    checked: root.opt_verbose;
+                    text: "Verbose Logging";
+                    toggled => { root.opt_verbose = self.checked; }
+                }
+            }
+        }
+    }
+
+    // fill remaining space
+    Rectangle { vertical_stretch: 1; }
+
+    // Properties
+    in-out property<string> client_path: "";
+    in-out property<string> server_path: "";
+    in-out property<string> python_root: "";
+    in-out property<bool> client_set: false;
+    in-out property<bool> server_set: false;
+    in-out property<bool> python_set: false;
+    in-out property<bool> is_running: false;
+
+    in-out property<bool> opt_multithread: true;
+    in-out property<bool> opt_include_funcs: true;
+    in-out property<bool> opt_include_defines: true;
+    in-out property<bool> opt_verbose: false;
+
+    // Callbacks
+    callback browse_path(int);
+    callback clear_paths();
+}

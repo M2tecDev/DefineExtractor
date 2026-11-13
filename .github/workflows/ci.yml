@@ -21,11 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Configure CMake (${{ matrix.preset }})
-        run: cmake --preset ${{ matrix.preset }}
-
-      - name: Build (${{ matrix.preset }})
-        run: cmake --build --preset ${{ matrix.preset }}
-
-      - name: Run tests (${{ matrix.preset }})
-        run: ./build/${{ matrix.preset }}/test_helpers.exe
+      - name: Configure, build and test (${{ matrix.preset }})
+        shell: cmd
+        run: |
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%i"
+          if not defined VSINSTALL exit /b 1
+          call "%VSINSTALL%\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 || exit /b 1
+          cmake --preset ${{ matrix.preset }} || exit /b 1
+          cmake --build --preset ${{ matrix.preset }} || exit /b 1
+          ctest --test-dir build/${{ matrix.preset }} --output-on-failure

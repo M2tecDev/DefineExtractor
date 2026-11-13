@@ -1,0 +1,250 @@
+/* defines.ui — Defines page with Client/Server columns */
+
+import { ListView, Button, HorizontalBox, VerticalBox, CheckBox, LineEdit } from "std-widgets.slint";
+
+component DefinesPage inherits HorizontalBox {
+    spacing: 16px;
+
+    // CLIENT column
+    VerticalBox {
+        horizontal_stretch: 1;
+        spacing: 10px;
+
+        Text {
+            text: "CLIENT";
+            font_size: 15px;
+            font_weight: 600;
+            color: #6366f1;
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Text { text: "Path:"; font_size: 12px; color: #94a3b8; }
+            Text {
+                text: root.client_path != "" ? root.client_path : "(not set)";
+                font_size: 12px;
+                color: #f8fafc;
+                horizontal_stretch: 1;
+            }
+            Rectangle { width: 12px; height: 12px; background: root.client_set ? #22c55e : #ef4444; }
+        }
+
+        Button {
+            text: "Load from Header";
+            height: 32px;
+            enabled: root.client_set && !root.is_running;
+            clicked => { load_defines(0); }
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Text { text: "🔍"; font_size: 13px; color: #94a3b8; }
+            LineEdit {
+                placeholder_text: "Filter defines...";
+                font_size: 13px;
+                horizontal_stretch: 1;
+                text: root.client_search;
+                enabled: root.defines_count > 0 || root.client_search != "";
+                edited => {
+                    root.client_search = self.text;
+                    root.client_filter_changed(self.text);
+                }
+            }
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Button {
+                text: "Select All";
+                height: 28px;
+                enabled: root.defines_count > 0;
+                clicked => { select_all_defines(true); }
+            }
+            Button {
+                text: "Deselect All";
+                height: 28px;
+                enabled: root.defines_count > 0;
+                clicked => { select_all_defines(false); }
+            }
+            Text {
+                text: root.defines_count > 0 ? root.defines_selected_count + " / " + root.defines_count : "";
+                font_size: 12px;
+                color: #94a3b8;
+            }
+        }
+
+        VerticalLayout {
+            min_height: 200px;
+            vertical_stretch: 1;
+
+            if (root.defines_count == 0): VerticalBox {
+                alignment: center;
+                Text {
+                    text: "No defines loaded.\nSelect Client path and click Load.";
+                    color: #94a3b8;
+                    horizontal_alignment: center;
+                }
+            }
+
+            if (root.defines_count > 0): ListView {
+                for i in root.defines_count: HorizontalBox {
+                    spacing: 8px;
+                    CheckBox {
+                        checked: root.defines_selected[i];
+                        toggled => { toggle_defines(i); }
+                    }
+                    Text {
+                        text: root.defines_names[i];
+                        font_size: 12px;
+                        vertical_stretch: 1;
+                    }
+                }
+            }
+        }
+
+        Button {
+            text: root.is_running ? "Extracting..." : "Extract Selected";
+            height: 38px;
+            enabled: root.defines_selected_count > 0 && !root.is_running;
+            clicked => { run_extraction(); }
+        }
+    }
+
+    // SERVER column
+    VerticalBox {
+        horizontal_stretch: 1;
+        spacing: 10px;
+
+        Text {
+            text: "SERVER";
+            font_size: 15px;
+            font_weight: 600;
+            color: #6366f1;
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Text { text: "Path:"; font_size: 12px; color: #94a3b8; }
+            Text {
+                text: root.server_path != "" ? root.server_path : "(not set)";
+                font_size: 12px;
+                color: #f8fafc;
+                horizontal_stretch: 1;
+            }
+            Rectangle { width: 12px; height: 12px; background: root.server_set ? #22c55e : #ef4444; }
+        }
+
+        Button {
+            text: "Load from Header";
+            height: 32px;
+            enabled: root.server_set && !root.is_running;
+            clicked => { load_defines(1); }
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Text { text: "🔍"; font_size: 13px; color: #94a3b8; }
+            LineEdit {
+                placeholder_text: "Filter defines...";
+                font_size: 13px;
+                horizontal_stretch: 1;
+                text: root.server_search;
+                enabled: root.server_defines_count > 0 || root.server_search != "";
+                edited => {
+                    root.server_search = self.text;
+                    root.server_filter_changed(self.text);
+                }
+            }
+        }
+
+        HorizontalBox {
+            spacing: 8px;
+            Button {
+                text: "Select All";
+                height: 28px;
+                enabled: root.server_defines_count > 0;
+                clicked => { select_all_server_defines(true); }
+            }
+            Button {
+                text: "Deselect All";
+                height: 28px;
+                enabled: root.server_defines_count > 0;
+                clicked => { select_all_server_defines(false); }
+            }
+            Text {
+                text: root.server_defines_count > 0 ? root.server_defines_selected_count + " / " + root.server_defines_count : "";
+                font_size: 12px;
+                color: #94a3b8;
+            }
+        }
+
+        VerticalLayout {
+            min_height: 200px;
+            vertical_stretch: 1;
+
+            if (root.server_defines_count == 0): VerticalBox {
+                alignment: center;
+                Text {
+                    text: "No defines loaded.\nSelect Server path and click Load.";
+                    color: #94a3b8;
+                    horizontal_alignment: center;
+                }
+            }
+
+            if (root.server_defines_count > 0): ListView {
+                for i in root.server_defines_count: HorizontalBox {
+                    spacing: 8px;
+                    CheckBox {
+                        checked: root.server_defines_selected[i];
+                        toggled => { toggle_server_defines(i); }
+                    }
+                    Text {
+                        text: root.server_defines_names[i];
+                        font_size: 12px;
+                        vertical_stretch: 1;
+                    }
+                }
+            }
+        }
+
+        Button {
+            text: root.is_running ? "Extracting..." : "Extract Selected";
+            height: 38px;
+            enabled: root.server_defines_selected_count > 0 && !root.is_running;
+            clicked => { run_extraction_server(); }
+        }
+    }
+
+    // Properties
+    in-out property<string> client_path: "";
+    in-out property<string> server_path: "";
+    in-out property<bool> client_set: false;
+    in-out property<bool> server_set: false;
+
+    in-out property<string> client_search: "";
+    in-out property<string> server_search: "";
+
+    in-out property<[string]> defines_names: [];
+    in-out property<[bool]> defines_selected: [];
+    in-out property<int> defines_count: 0;
+    in-out property<int> defines_selected_count: 0;
+
+    in-out property<[string]> server_defines_names: [];
+    in-out property<[bool]> server_defines_selected: [];
+    in-out property<int> server_defines_count: 0;
+    in-out property<int> server_defines_selected_count: 0;
+
+    in-out property<bool> is_running: false;
+
+    // Callbacks
+    callback load_defines(int);
+    callback select_all_defines(bool);
+    callback toggle_defines(int);
+    callback run_extraction();
+    callback client_filter_changed(string);
+
+    callback select_all_server_defines(bool);
+    callback toggle_server_defines(int);
+    callback run_extraction_server();
+    callback server_filter_changed(string);
+}

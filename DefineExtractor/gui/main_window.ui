@@ -1,0 +1,209 @@
+/* main_window.ui — DefineExtractor GUI FINAL */
+
+import { Button, HorizontalBox, VerticalBox, ProgressIndicator } from "std-widgets.slint";
+
+import { HomePage } from "pages/home.ui";
+import { DefinesPage } from "pages/defines.ui";
+import { ParamsPage } from "pages/params.ui";
+import { SettingsPage } from "pages/settings.ui";
+import { LogsPage } from "pages/logs.ui";
+
+export component MainWindow inherits Window {
+    title: "DefineExtractor";
+    background: #0f0f14;
+    preferred-width: 1200px;
+    preferred-height: 800px;
+    min_width: 900px;
+    min_height: 600px;
+
+    in-out property<int> current_page: 0;
+    in-out property<string> client_path: "";
+    in-out property<string> server_path: "";
+    in-out property<string> python_root: "";
+    in-out property<bool> client_set: false;
+    in-out property<bool> server_set: false;
+    in-out property<bool> python_set: false;
+    in-out property<string> log_text: "";
+    in-out property<string> changelog_text: "";
+    in-out property<[string]> recent_folders: [];
+    in-out property<[int]> recent_timestamps: [];
+    in-out property<bool> is_running: false;
+    in-out property<float> progress_value: 0.0;
+    in-out property<string> status_text: "Ready";
+
+    in-out property<[string]> defines_names: [];
+    in-out property<[bool]> defines_selected: [];
+    in-out property<int> defines_count: 0;
+    in-out property<int> defines_selected_count: 0;
+    in-out property<[string]> server_defines_names: [];
+    in-out property<[bool]> server_defines_selected: [];
+    in-out property<int> server_defines_count: 0;
+    in-out property<int> server_defines_selected_count: 0;
+    in-out property<[string]> params_names: [];
+    in-out property<[bool]> params_selected: [];
+    in-out property<int> params_count: 0;
+    in-out property<int> params_selected_count: 0;
+    in-out property<string> search_filter: "";
+
+    in-out property<bool> opt_multithread: true;
+    in-out property<bool> opt_include_funcs: true;
+    in-out property<bool> opt_include_defines: true;
+    in-out property<bool> opt_verbose: false;
+
+    callback open_recent_folder(string);
+    callback load_defines_callback(int);
+    callback select_all_defines_callback(bool);
+    callback toggle_defines_callback(int);
+    callback select_all_server_defines_callback(bool);
+    callback toggle_server_defines_callback(int);
+    callback run_extraction_callback(int);
+    callback browse_python_callback();
+    callback load_python_params_callback();
+    callback select_all_params_callback(bool);
+    callback toggle_param_callback(int);
+    callback run_python_extraction_callback();
+    callback filter_params_callback(string);
+    callback browse_path_callback(int);
+    callback clear_paths_callback();
+    callback client_filter_defines_callback(string);
+    callback server_filter_defines_callback(string);
+    callback clear_log_callback();
+    callback save_log_callback();
+    callback debug_log();
+
+    VerticalBox {
+        spacing: 0;
+        padding: 0;
+
+        HorizontalBox {
+            alignment: stretch;
+            height: 100%;
+
+            Rectangle {
+                width: 180px;
+                background: #1a1a2e;
+                VerticalBox {
+                    padding: 8px;
+                    spacing: 4px;
+                    alignment: start;
+
+                    Text { text: "MENU"; font_size: 14px; font_weight: 600; color: #6366f1; }
+                    Button { text: "Home"; height: 40px; clicked => { root.current_page = 0; } }
+                    Button { text: "Defines"; height: 40px; clicked => { root.current_page = 1; } }
+                    Button { text: "Params"; height: 40px; clicked => { root.current_page = 2; } }
+                    Button { text: "Settings"; height: 40px; clicked => { root.current_page = 3; } }
+                    Button { text: "Logs"; height: 40px; clicked => { root.current_page = 4; } }
+                }
+            }
+
+            Rectangle {
+                background: #0f0f14;
+                horizontal_stretch: 1;
+
+                if (root.current_page == 0): HomePage {
+                    changelog_text: root.changelog_text;
+                    recent_folders: root.recent_folders;
+                    recent_timestamps: root.recent_timestamps;
+                    open_folder(p) => { root.open_recent_folder(p); }
+                }
+                if (root.current_page == 1): DefinesPage {
+                    client_path: root.client_path;
+                    server_path: root.server_path;
+                    client_set: root.client_set;
+                    server_set: root.server_set;
+                    defines_names: root.defines_names;
+                    defines_selected: root.defines_selected;
+                    defines_count: root.defines_count;
+                    defines_selected_count: root.defines_selected_count;
+                    server_defines_names: root.server_defines_names;
+                    server_defines_selected: root.server_defines_selected;
+                    server_defines_count: root.server_defines_count;
+                    server_defines_selected_count: root.server_defines_selected_count;
+                    is_running: root.is_running;
+                    load_defines(m) => { root.load_defines_callback(m); }
+                    select_all_defines(y) => { root.select_all_defines_callback(y); }
+                    toggle_defines(i) => { root.toggle_defines_callback(i); }
+                    run_extraction() => { root.run_extraction_callback(0); }
+                    client_filter_changed(f) => { root.client_filter_defines_callback(f); }
+                    select_all_server_defines(y) => { root.select_all_server_defines_callback(y); }
+                    toggle_server_defines(i) => { root.toggle_server_defines_callback(i); }
+                    run_extraction_server() => { root.run_extraction_callback(1); }
+                    server_filter_changed(f) => { root.server_filter_defines_callback(f); }
+                }
+                if (root.current_page == 2): ParamsPage {
+                    python_root: root.python_root;
+                    python_set: root.python_set;
+                    params_names: root.params_names;
+                    params_selected: root.params_selected;
+                    params_count: root.params_count;
+                    params_selected_count: root.params_selected_count;
+                    is_running: root.is_running;
+                    search_filter: root.search_filter;
+                    browse_python() => { root.browse_python_callback(); }
+                    load_python_params() => { root.load_python_params_callback(); }
+                    select_all_params(y) => { root.select_all_params_callback(y); }
+                    toggle_param(i) => { root.toggle_param_callback(i); }
+                    run_extraction() => { root.run_python_extraction_callback(); }
+                    filter_changed(f) => { root.filter_params_callback(f); }
+                    debug() => { root.debug_log(); }
+                }
+                if (root.current_page == 3): SettingsPage {
+                    client_path: root.client_path;
+                    server_path: root.server_path;
+                    python_root: root.python_root;
+                    client_set: root.client_set;
+                    server_set: root.server_set;
+                    python_set: root.python_set;
+                    opt_multithread: root.opt_multithread;
+                    opt_include_funcs: root.opt_include_funcs;
+                    opt_include_defines: root.opt_include_defines;
+                    opt_verbose: root.opt_verbose;
+                    browse_path(m) => { root.browse_path_callback(m); }
+                    clear_paths() => { root.clear_paths_callback(); }
+                }
+                if (root.current_page == 4): LogsPage {
+                    log_text: root.log_text;
+                    clear_log() => { root.clear_log_callback(); }
+                    save_log() => { root.save_log_callback(); }
+                }
+            }
+        }
+
+        Rectangle {
+            background: #1a1a2e;
+            height: root.is_running ? 52px : 32px;
+            vertical_stretch: 0;
+
+            VerticalBox {
+                padding: 6px;
+                spacing: 4px;
+
+                HorizontalBox {
+                    spacing: 8px;
+                    vertical_stretch: 0;
+
+                    Text {
+                        text: root.status_text;
+                        color: #94a3b8;
+                        font_size: 12px;
+                        vertical_alignment: center;
+                        horizontal_stretch: 1;
+                    }
+
+                    if root.is_running: Text {
+                        text: round(root.progress_value * 100) + "%";
+                        color: #6366f1;
+                        font_size: 12px;
+                        font_weight: 600;
+                        vertical_alignment: center;
+                    }
+                }
+
+                if root.is_running: ProgressIndicator {
+                    vertical_stretch: 0;
+                    progress: root.progress_value;
+                }
+            }
+        }
+    }
+}

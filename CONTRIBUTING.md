@@ -35,8 +35,8 @@ Bevor du beginnst, stelle sicher, dass du die [README.md](README.md) gelesen has
    ```bat
    git checkout -b feature/mein-feature
    ```
-3. Halte dich an den bestehenden Code-Stil (C++20, keine externen Abhängigkeiten außer Catch2 für Tests).
-4. **Schreibe Tests** für jede neue Funktion oder jeden Fix in `tests/test_helpers.cpp`.
+3. Halte dich an den bestehenden Code-Stil (C++23, Slint für die GUI, Catch2 für Tests).
+4. **Ergänze Tests** für neue Funktionen und Fehlerkorrekturen in `tests/`.
 5. Stelle sicher, dass alle Tests bestehen:
    ```bat
    cmake --preset debug && cmake --build --preset debug --target test_helpers
@@ -52,8 +52,8 @@ Bevor du beginnst, stelle sicher, dass du die [README.md](README.md) gelesen has
 
 ### Code-Stil
 
-- **Sprache**: C++20
-- **Standard-Bibliothek**: Nur STL — keine externen Bibliotheken im Produktionscode.
+- **Sprache**: C++23
+- **Abhängigkeiten**: Standardbibliothek für den Kern, Slint für die GUI.
 - **Namenskonventionen**: `camelCase` für Funktionen und Variablen, `PascalCase` für Typen.
 - **Kommentare**: Englisch.
 - **Neue Hilfsfunktionen**: Wenn möglich in `DefineExtractor/helpers.h` auslagern (testbar halten).
@@ -101,8 +101,8 @@ Make sure you have read the [README.md](README.md) and can build the project loc
    ```bat
    git checkout -b feature/my-feature
    ```
-3. Follow the existing code style (C++20, no external production dependencies).
-4. **Write tests** for any new function or bug fix in `tests/test_helpers.cpp`.
+3. Follow the existing code style (C++23, Slint for the GUI, Catch2 for tests).
+4. **Add tests** for new functions and bug fixes in `tests/`.
 5. Verify all tests pass:
    ```bat
    cmake --preset debug && cmake --build --preset debug --target test_helpers
@@ -118,8 +118,8 @@ Make sure you have read the [README.md](README.md) and can build the project loc
 
 ### Code Style
 
-- **Language**: C++20
-- **Dependencies**: STL only in production code — no external libraries.
+- **Language**: C++23
+- **Dependencies**: Standard library for the core, Slint for the GUI.
 - **Naming**: `camelCase` for functions and variables, `PascalCase` for types.
 - **Comments**: English.
 - **New helpers**: Extract to `DefineExtractor/helpers.h` where possible to keep them unit-testable.

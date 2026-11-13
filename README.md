@@ -2,17 +2,21 @@
 
 [**Deutsch**](#deutsch) | [**English**](#english)
 
+[**Download für Windows x64 / Windows x64 download**](https://github.com/M2tecDev/DefineExtractor/releases/latest)
+
+[![Made with Slint](https://raw.githubusercontent.com/slint-ui/slint/e9c1ca295f9356af71f1e251c287de18406b46f6/logo/MadeWithSlint-logo-whitebg.png)](https://slint.dev/)
+
 ---
 
 ## <a name="deutsch"></a>Deutsch
 
 ### 1. Überblick
 
-**DefineExtractor** ist ein C++20-Kommandozeilenprogramm für Windows, das Quellcode nach folgenden Mustern durchsucht:
+**DefineExtractor** ist ein Windows-Werkzeug mit grafischer Oberfläche und Konsole. Es durchsucht Quellcode nach folgenden Mustern:
 - `#define`-Makros in `.h`- und `.cpp`-Dateien
 - `app.xyz`-Aufrufe in `.py`-Dateien
 
-Das Tool nutzt Multithreading und Memory-Mapping für effizientes Scannen großer Codebasen.
+Alle ausgewählten Symbole werden in einem Durchlauf pro Datei gesucht. Für den portablen Download das ZIP in einen beschreibbaren Ordner entpacken und `DefineExtractorGUI.exe` starten. Die Konsole ist als `DefineExtractor.exe` enthalten.
 
 ---
 
@@ -25,16 +29,15 @@ Das Tool nutzt Multithreading und Memory-Mapping für effizientes Scannen große
    - Zeigt alle definierten Makros aus den erkannten Headern an, um gezielt nach einem bestimmten `#define` zu suchen.
 
 3. **Python-Parameter**
-   - Ermittelt alle Aufrufe im Format `app.xyz` innerhalb von `.py`-Dateien und listet diese übersichtlich auf.
+   - Listet `app.xyz` aus `if`- und `elif`-Bedingungen in Python-Dateien auf.
 
 4. **Ausgabedateien in `Output/`**
-   - Für jedes gescannte Makro bzw. jeden Python-Parameter erzeugt das Tool zwei Textdateien:
-     - `*_DEFINE.txt`: `#if <DEFINE>`-Blöcke bzw. `if app.xyz`-Blöcke
-     - `*_FUNC.txt`: Funktionen, in denen das Define bzw. der Parameter auftaucht
+   - Jeder Lauf erhält einen eigenen Ordner in `Output/`. Pro Symbol gibt es zwei Textdateien mit relativen Quellpfaden und Zeilenbereichen.
+     - `*_DEFINE.txt` enthält die passenden C++-Präprozessorzweige oder Python-`if`/`elif`-Blöcke.
+     - `*_FUNC.txt` enthält die zugehörigen Funktionen.
 
 5. **Multithreading**
-   - Dateien werden parallel auf alle verfügbaren CPU-Kerne verteilt.
-   - Ein Pre-Filter (`#` + Define-Name) verhindert unnötige Regex-Aufrufe auf irrelevanten Zeilen.
+   - Die Worker teilen sich die Dateien. Jede Datei wird einmal für alle ausgewählten Symbole gelesen und analysiert.
 
 ---
 
@@ -43,8 +46,9 @@ Das Tool nutzt Multithreading und Memory-Mapping für effizientes Scannen große
 | Komponente | Version |
 |---|---|
 | Visual Studio | 2022 oder 2026 (Workload: *Desktopentwicklung mit C++*) |
-| CMake | ≥ 3.15 (im VS-Lieferumfang enthalten) |
-| C++-Standard | C++20 |
+| CMake | ≥ 3.25 (im VS-Lieferumfang enthalten) |
+| Rust | Stable, erforderlich zum Bauen von Slint |
+| C++-Standard | C++23 |
 | Betriebssystem | Windows (x64) |
 
 ---
@@ -61,7 +65,7 @@ Das Projekt verwendet **CMake mit Presets** (`CMakePresets.json`). Zwei Konfigur
    - `Debug (x64)` → `build/debug/DefineExtractor.exe`
    - `Release (x64)` → `build/release/DefineExtractor.exe`
 4. Konfiguration wählen → **Strg+Umschalt+B** zum Bauen.
-5. Im Dropdown **„Startobjekt auswählen"** → `DefineExtractor.exe` wählen → **F5** / **Strg+F5**.
+5. Im Dropdown **„Startobjekt auswählen"** → `DefineExtractorGUI.exe` oder `DefineExtractor.exe` wählen → **F5** / **Strg+F5**.
 
 #### Option B – Developer Command Prompt
 
@@ -82,7 +86,7 @@ cmake --preset release  && cmake --build --preset release
 
 ### 5. Tests
 
-Das Projekt enthält Unit-Tests mit **Catch2 v2** (Single-Header, keine externe Abhängigkeit):
+Das Projekt enthält Unit-Tests mit **Catch2 v3** (über CMake FetchContent bezogen):
 
 ```bat
 cmake --preset debug && cmake --build --preset debug --target test_helpers
@@ -102,7 +106,7 @@ DefineExtractor/
 │   └─ helpers.h             # Performance-Hilfsfunktionen (testbar)
 ├─ tests/
 │   ├─ test_helpers.cpp      # Catch2-Tests
-│   └─ catch2/catch.hpp      # Catch2 v2 Single-Header
+│   # Catch2 v3 wird automatisch via CMake bezogen
 ├─ .github/
 │   └─ dependabot.yml
 ├─ CMakeLists.txt
@@ -131,15 +135,14 @@ C:\MeineProjekte\
 **Ablauf:**
 1. Pfad-Menü: **Client**, **Server** und **Python Root** setzen.
 2. Hauptmenü: Gewünschten Scan-Typ wählen.
-3. Define / Parameter auswählen → Ergebnisse landen in `Output/`.
+3. Ein oder mehrere Defines oder Parameter auswählen. In der Konsole werden die Nummern mit Leerzeichen oder Kommas getrennt.
 
 ---
 
 ### 8. Bekannte Einschränkungen
 
-- **Regex-Grenzen**: Bei stark verschachtelten oder unkonventionellen Makros kann die Erkennung fehlschlagen.
-- **Windows-Fokus**: Memory-Mapping (`MapViewOfFile`) ist Windows-spezifisch; unter Linux greift ein `getline`-Fallback.
-- **Keine tiefe Python-Analyse**: Nur `if app.xyz`-Blöcke und `def`-Funktionen werden erfasst.
+- Die C++-Analyse erfasst Quelltext in allen Präprozessorzweigen. Sie expandiert keine Makros und verwendet Heuristiken für Funktionsgrenzen.
+- Die Python-Analyse erfasst `app.xyz` in `if`- und `elif`-Bedingungen und ordnet die Treffer umgebenden Funktionen zu.
 
 ---
 
@@ -161,11 +164,11 @@ Kein spezifischer Lizenztext enthalten. Verwendung auf eigene Verantwortung.
 
 ### 1. Overview
 
-**DefineExtractor** is a Windows-oriented C++20 command-line tool that searches source code for:
+**DefineExtractor** is a Windows desktop and console tool that searches source code for:
 - `#define` macros in `.h` and `.cpp` files
 - `app.xyz` references in `.py` files
 
-It uses multithreading and memory-mapped I/O for fast scanning of large codebases.
+It checks all selected symbols in one pass per file. To use the portable download, extract the ZIP to a writable folder and run `DefineExtractorGUI.exe`. The package also includes `DefineExtractor.exe` for console use.
 
 ---
 
@@ -173,11 +176,10 @@ It uses multithreading and memory-mapped I/O for fast scanning of large codebase
 
 1. **Automatic Header Detection** — finds `locale_inc.h` (Client) and `service.h` / `commondefines.h` (Server) by recursive folder scan.
 2. **Macro Listing** — displays all macros from the detected header for targeted `#define` searches.
-3. **Python Parameter Discovery** — locates `app.xyz` calls in `.py` files.
-4. **Output Files in `Output/`** — two files per macro or parameter:
-   - `*_DEFINE.txt`: matching `#if … #endif` or `if app.xyz` blocks
-   - `*_FUNC.txt`: functions referencing the define or parameter
-5. **Multithreading** — distributes files across all CPU cores with a fast pre-filter that skips the regex on irrelevant lines.
+3. **Python Parameter Discovery** — lists `app.xyz` references in `if` and `elif` conditions.
+4. **Output Files** — each run gets a directory in `Output/` with two files per symbol. Reports list relative source paths and line ranges.
+   - `*_DEFINE.txt` contains matching C++ preprocessor branches or Python `if`/`elif` blocks.
+   - `*_FUNC.txt` contains the associated functions.
 
 ---
 
@@ -186,8 +188,9 @@ It uses multithreading and memory-mapped I/O for fast scanning of large codebase
 | Component | Version |
 |---|---|
 | Visual Studio | 2022 or 2026 (workload: *Desktop development with C++*) |
-| CMake | ≥ 3.15 (bundled with VS) |
-| C++ standard | C++20 |
+| CMake | ≥ 3.25 (bundled with VS) |
+| Rust | Stable, required to build Slint |
+| C++ standard | C++23 |
 | OS | Windows (x64) |
 
 ---
@@ -204,7 +207,7 @@ The project uses **CMake Presets** (`CMakePresets.json`) with two configurations
    - `Debug (x64)` → `build/debug/DefineExtractor.exe`
    - `Release (x64)` → `build/release/DefineExtractor.exe`
 4. Select a configuration → **Ctrl+Shift+B** to build.
-5. In **"Select Startup Item"** choose `DefineExtractor.exe` → **F5** / **Ctrl+F5**.
+5. In **"Select Startup Item"** choose `DefineExtractorGUI.exe` or `DefineExtractor.exe` → **F5** / **Ctrl+F5**.
 
 #### Option B — Developer Command Prompt
 
@@ -224,7 +227,7 @@ cmake --preset release  && cmake --build --preset release
 
 ### 5. Tests
 
-Unit tests use **Catch2 v2** (single-header, no external install required):
+Unit tests use **Catch2 v3** (fetched via CMake FetchContent):
 
 ```bat
 cmake --preset debug && cmake --build --preset debug --target test_helpers
@@ -244,7 +247,7 @@ DefineExtractor/
 │   └─ helpers.h             # performance helpers (unit-tested)
 ├─ tests/
 │   ├─ test_helpers.cpp      # Catch2 tests
-│   └─ catch2/catch.hpp      # Catch2 v2 single-header
+│   # Catch2 v3 is fetched automatically via CMake
 ├─ .github/
 │   └─ dependabot.yml
 ├─ CMakeLists.txt
@@ -273,15 +276,14 @@ C:\MyProjects\
 **Workflow:**
 1. Path menu: set **Client**, **Server**, and **Python Root**.
 2. Main menu: choose the scan type.
-3. Select a define or parameter → results appear in `Output/`.
+3. Select one or more defines or parameters. In the console, separate indices with spaces or commas.
 
 ---
 
 ### 8. Known Limitations
 
-- **Regex boundaries**: Highly unconventional or deeply nested macros may be missed or over-matched.
-- **Windows focus**: Memory-mapped I/O (`MapViewOfFile`) is Windows-specific; a `getline` fallback is used on other platforms.
-- **Limited Python analysis**: Only `if app.xyz` blocks and `def` functions are captured.
+- C++ scanning considers source text in every preprocessor branch. It uses heuristics for function boundaries and does not expand macros.
+- Python scanning captures `app.xyz` in `if` and `elif` conditions and associates matches with enclosing functions.
 
 ---
 

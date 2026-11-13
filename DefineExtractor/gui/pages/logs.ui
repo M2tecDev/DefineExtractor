@@ -1,0 +1,51 @@
+/* logs.ui — Logs page with Output Log */
+
+import { Button, HorizontalBox, VerticalBox, TextEdit } from "std-widgets.slint";
+
+component LogsPage inherits VerticalBox {
+    spacing: 12px;
+    padding: 8px;
+
+    HorizontalBox {
+        spacing: 12px;
+        vertical_stretch: 0;
+
+        Text {
+            text: "OUTPUT LOG";
+            font_size: 15px;
+            font_weight: 600;
+            color: #6366f1;
+        }
+
+        HorizontalBox { horizontal_stretch: 1; }
+
+        Button {
+            text: "Clear";
+            height: 32px;
+            clicked => { clear_log(); }
+        }
+
+        Button {
+            text: "Save";
+            height: 32px;
+            clicked => { save_log(); }
+        }
+    }
+
+    // TextEdit has built-in scrolling — no ScrollView wrapper needed
+    TextEdit {
+        vertical_stretch: 1;
+        text: root.log_text;
+        read_only: true;
+        font_family: "Consolas";
+        font_size: 12px;
+        wrap: no_wrap;
+    }
+
+    // Properties
+    in-out property<string> log_text: "";
+
+    // Callbacks
+    callback clear_log();
+    callback save_log();
+}

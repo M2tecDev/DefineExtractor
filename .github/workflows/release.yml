@@ -18,14 +18,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Configure CMake (Release)
-        run: cmake --preset release
+      - name: Build, test and stage portable release
+        shell: cmd
+        run: |
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%i"
+          if not defined VSINSTALL exit /b 1
+          call "%VSINSTALL%\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 || exit /b 1
+          cmake --preset release || exit /b 1
+          cmake --build --preset release || exit /b 1
+          ctest --test-dir build/release --output-on-failure || exit /b 1
+          cmake --install build/release --config Release --component DefineExtractorPortable --prefix build/portable
 
-      - name: Build (Release)
-        run: cmake --build --preset release
-
-      - name: Run tests
-        run: ./build/release/test_helpers.exe
+      - name: Create portable ZIP
+        run: |
+          $required = @('DefineExtractorGUI.exe', 'DefineExtractor.exe', 'slint_cpp.dll', 'msvcp140.dll', 'msvcp140_atomic_wait.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')
+          foreach ($file in $required) {
+            if (!(Test-Path -LiteralPath "build/portable/$file" -PathType Leaf)) {
+              throw "Missing release file: $file"
+            }
+          }
+          Compress-Archive -Path build/portable/* -DestinationPath "build/DefineExtractor-${{ github.ref_name }}-windows-x64.zip"
 
       - name: Upload Release
         uses: softprops/action-gh-release@v3
@@ -35,10 +47,14 @@ jobs:
             ## DefineExtractor ${{ github.ref_name }}
 
             ### Download
-            - **DefineExtractor.exe** – Windows x64 Release Build
+            Extract the Windows x64 ZIP to a writable folder. Run `DefineExtractorGUI.exe` for the desktop app or `DefineExtractor.exe` for the console.
+
+            [![Made with Slint](https://raw.githubusercontent.com/slint-ui/slint/e9c1ca295f9356af71f1e251c287de18406b46f6/logo/MadeWithSlint-logo-whitebg.png)](https://slint.dev/)
 
             ### Changelog
             See [commits](${{ github.server_url }}/${{ github.repository }}/commits/${{ github.ref_name }}) for full history.
-          files: build/release/DefineExtractor.exe
+          files: build/DefineExtractor-${{ github.ref_name }}-windows-x64.zip
+          fail_on_unmatched_files: true
+          overwrite_files: false
           draft: false
           prerelease: false
